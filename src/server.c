@@ -8,6 +8,8 @@
 #include <pthread.h>
 
 #include "./utils.h"
+#include "./lib.h"
+
 
 int main_cycle(time_t end_time, int fd_public_fifo) {
     message_t message_received;
@@ -72,6 +74,12 @@ int input_check(int argc, char *argv[], int *nsecs, int *bufsz,int *fd_public_fi
 }
 
 int main(int argc, char *argv[]) {
+
+    // just to check that's working
+    for (int i = 0; i < 100; i++)
+        printf("res: %d\n", task(9));
+
+    /*
     time_t start_time = time(NULL);
     
 
@@ -91,9 +99,11 @@ int main(int argc, char *argv[]) {
         return 1;
     }
     
+    
+    
 
     close(fd_public_fifo);
     //printf("we're closed\n");
-
+*/
     return 0;
 }

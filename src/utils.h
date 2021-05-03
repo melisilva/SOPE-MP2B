@@ -1,5 +1,5 @@
-#ifndef SRC_UTILS_H_
-#define SRC_UTILS_H_
+#ifndef _UTILS_H
+#define _UTILS_H
 
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -34,4 +34,4 @@ void message_builder(message_t *message, int i, int t, int res);
 
 int log_operation(message_t *message, oper_t oper);
 
-#endif  // SRC_UTILS_H_
+#endif  // _UTILS_H
