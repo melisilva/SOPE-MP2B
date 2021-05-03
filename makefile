@@ -1,9 +1,7 @@
-c: src/*.c src/*.h
-	gcc -Wall src/*.c -o c -pthread
+s: src/*.c src/*.h src/lib.o
+	gcc -Wall -DDELAY=100 -o s src/*.c src/lib.o -pthread
 
 
 clean:
-	rm -f c
-
-
+	rm -f s
 

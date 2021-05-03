@@ -87,6 +87,7 @@ int main(int argc, char *argv[]) {
     
     time_t end_time = start_time + nsecs;
     if(main_cycle(end_time, fd_public_fifo)){
+        close(fd_public_fifo);
         return 1;
     }
     
