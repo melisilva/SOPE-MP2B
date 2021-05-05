@@ -6,10 +6,13 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <pthread.h>
+#include <errno.h>
 
 #include "./utils.h"
 #include "./lib.h"
 
+#define PUBLIC_PERMS 0666
+#define DEFAULT_BUFFER_SIZE 1 // TODO what is the defaut value?
 
 int main_cycle(time_t end_time, int fd_public_fifo) {
     message_t message_received;
@@ -30,7 +33,8 @@ int main_cycle(time_t end_time, int fd_public_fifo) {
 
 int input_check(int argc, char *argv[], int *nsecs, int *bufsz,int *fd_public_fifo) {
     //s -t nsecs -l bufsz fifoname
-    if (argc != 6) {
+    //s -t nsecs fifoname
+    if (argc != 6 && argc != 4) {
         fprintf(stderr, "Invalid number of arguments.\n");
         return 1;
     }
@@ -48,25 +52,37 @@ int input_check(int argc, char *argv[], int *nsecs, int *bufsz,int *fd_public_fi
         return 1;
     }
 
-    if (strcmp(argv[3], "-s")) {
-        // id argv[3] != "-s"
-        fprintf(stderr, "Expected -s parameter not found.\n");
-        return 1;
+    if (argc == 6) {
+        if (strcmp(argv[3], "-l")) {
+            // id argv[3] != "-l"
+            fprintf(stderr, "Expected -l parameter not found.\n");
+            return 1;
+        }
+
+        *bufsz = strtol(argv[4], &end, 10);
+        if (argv[4] == end) {
+            fprintf(stderr, "Invalid storage size.\n");
+            return 1;
+        }
+    } else {
+        *bufsz = DEFAULT_BUFFER_SIZE;
     }
 
-    *bufsz = strtol(argv[4], &end, 10);
-    if (argv[4] == end) {
-        fprintf(stderr, "Invalid storage size.\n");
-        return 1;
+    int cod;
+    if ((cod = mkfifo(argv[3 + 2*(argc == 6)], PUBLIC_PERMS)) != 0) {
+        if (errno != EEXIST) {
+            // TODO what to do if fifo with this name already exists?
+            // run normally?
+            perror("");
+            //fprintf(stderr, "Not possible to make public fifo.\n");
+            return 1;
+        }
     }
 
-    if (mkfifo(argv[5], 0666) != 0) {
-        fprintf(stderr, "Not possible to make public fifo.\n");
-        return 1;
-    }
-
-    if ((*fd_public_fifo = open(argv[5], O_RDONLY)) == -1) {
-         fprintf(stderr, "Not possible to open public fifo.\n");
+    if ((*fd_public_fifo = open(argv[3 + 2*(argc == 6)], O_RDONLY)) == -1) {
+        perror("");
+        //fprintf(stderr, "Not possible to open public fifo.\n");
+        unlink(argv[3 + 2*(argc == 6)]);
         return 1;
     }
 
@@ -74,12 +90,6 @@ int input_check(int argc, char *argv[], int *nsecs, int *bufsz,int *fd_public_fi
 }
 
 int main(int argc, char *argv[]) {
-
-    // just to check that's working
-    for (int i = 0; i < 100; i++)
-        printf("res: %d\n", task(9));
-
-    /*
     time_t start_time = time(NULL);
     
 
@@ -88,22 +98,27 @@ int main(int argc, char *argv[]) {
     int bufsz;
     int fd_public_fifo;
 
-    if (input_check(argc, argv, &nsecs, &bufsz,&fd_public_fifo) != 0) {
+    fprintf(stderr, "main before input check\n");
+
+    if (input_check(argc, argv, &nsecs, &bufsz, &fd_public_fifo) != 0) {
         return 1;
     }
 
+    fprintf(stderr, "main before main loop\n");
     
     time_t end_time = start_time + nsecs;
     if(main_cycle(end_time, fd_public_fifo)){
         close(fd_public_fifo);
+        unlink(argv[3 + 2*(argc == 6)]);
         return 1;
     }
-    
-    
+
+    fprintf(stderr, "main after main loop\n");
     
 
     close(fd_public_fifo);
-    //printf("we're closed\n");
-*/
+    unlink(argv[3 + 2*(argc == 6)]);
+    fprintf(stderr, "we're closed\n");
+
     return 0;
 }
