@@ -9,20 +9,25 @@
 
 #include "./utils.h"
 #include "./lib.h"
+#include "./thread.h"
 
 
 int main_cycle(time_t end_time, int fd_public_fifo) {
     message_t message_received;
+    size_t size_tids = 1000;
+    pthread_t *tids = malloc(size_tids * sizeof(pthread_t));
+    size_t i = 0;
     while (time(NULL) < end_time ) {
         //get info in queue
-       if(read(fd_public_fifo, &message_received, sizeof(message_t))<0){
-           perror("Couldn't read public FIFO");
-           return 1;
-       }
-       message_builder(&message_received, message_received.rid, message_received.tskload, message_received.tskres);
+        if(read(fd_public_fifo, &message_received, sizeof(message_t))<0){
+            perror("Couldn't read public FIFO");
+            return 1;
+        }
+        message_builder(&message_received, message_received.rid, message_received.tskload, message_received.tskres);
+
+        pthread_create(&tids[i], NULL, thread_entry, (void*)&message_received);
+        i++;
     }
-
-
 
     return 0;
 }
