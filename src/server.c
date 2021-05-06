@@ -12,14 +12,32 @@
 
 
 int main_cycle(time_t end_time, int fd_public_fifo) {
+    size_t size_tids = 1000;
+    pthread_t *tids = malloc(size_tids * sizeof(pthread_t));
     message_t message_received;
+
+    if (tids == NULL){
+        return 1;
+    }
+
+    size_t i = 0;
     while (time(NULL) < end_time ) {
-        //get info in queue
+        // Gets 
        if(read(fd_public_fifo, &message_received, sizeof(message_t))<0){
            perror("Couldn't read public FIFO");
            return 1;
        }
+       
+       // Message received.
        message_builder(&message_received, message_received.rid, message_received.tskload, message_received.tskres);
+       log_operation(&message_received, RECVD);
+        
+
+       // Acusa ter recebido a mensagem.
+       log_operation(&message_received, TSKDN);
+
+
+
     }
 
 
