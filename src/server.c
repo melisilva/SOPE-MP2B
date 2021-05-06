@@ -13,6 +13,8 @@
 
 #define PUBLIC_PERMS 0666
 #define DEFAULT_BUFFER_SIZE 1 // TODO what is the defaut value?
+pthread_mutex_t LOCK_STORAGE; // extern pthread_mutex_t LOCK_STORAGE; in thread.h
+
 
 int main_cycle(time_t end_time, int fd_public_fifo) {
     message_t message_received;
@@ -30,6 +32,21 @@ int main_cycle(time_t end_time, int fd_public_fifo) {
     return 0;
 }
 
+int init_mutexs(){
+    if(pthread_mutex_init(&LOCK_STORAGE, NULL) != 0) {
+        perror("");
+        return 1;
+    }
+    return 0;
+}
+
+int destroy_mutexs(){
+    if(pthread_mutex_destroy(&LOCK_STORAGE) != 0) {
+        perror("");
+        return 1;
+    }
+    return 0;
+}
 
 int input_check(int argc, char *argv[], int *nsecs, int *bufsz,int *fd_public_fifo) {
     //s -t nsecs -l bufsz fifoname
@@ -104,6 +121,12 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
+    if (init_mutexs() != 0) {
+        close(fd_public_fifo);
+        unlink(argv[3 + 2*(argc == 6)]);
+        return 1;
+    }
+
     fprintf(stderr, "main before main loop\n");
     
     time_t end_time = start_time + nsecs;
@@ -115,6 +138,11 @@ int main(int argc, char *argv[]) {
 
     fprintf(stderr, "main after main loop\n");
     
+    if (destroy_mutexs() != 0) {
+        close(fd_public_fifo);
+        unlink(argv[3 + 2*(argc == 6)]);
+        return 1;
+    }
 
     close(fd_public_fifo);
     unlink(argv[3 + 2*(argc == 6)]);
