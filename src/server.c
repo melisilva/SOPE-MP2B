@@ -31,13 +31,18 @@ int main_cycle(time_t end_time, int fd_public_fifo) {
            return 1;
        }
        message_builder(&message_received, message_received.rid, message_received.tskload, message_received.tskres);
-       log_operation(&message_received, RECVD);
+       if(log_operation(&message_received, RECVD) != 0) {
+           free(tids);
+           return 1;
+       }
        pthread_create(&tids[i], NULL, thread_entry_prod, (void*)&message_received); //Produtores-->various
        i++;
     }
 
+    //2LATE should probably be in a pthread_cancel handler? Also changes res to -1
 
 
+    free(tids);
     return 0;
 }
 

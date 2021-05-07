@@ -2,7 +2,7 @@
 #include "./utils.h"
 #include "./server.h"
 
-#include "stdlib.h"
+#include <stdlib.h>
 
 pthread_mutex_t LOCK_STORAGE;
 
@@ -39,6 +39,13 @@ void* thread_entry_prod(void *arg){
     int res = task(recv_message.tskload);
     recv_message.tskres = res;
 
+    recv_message.pid = getpid();
+    recv_message.tid = pthread_self();
+
+    if(log_operation(&recv_message, TSKEX) != 0) {
+        return NULL;
+    }
+
     if(!full(q)) { //devendo os threads  Consumidor e Produtores ficarbloqueados quando o armazém estiver, respectivamente, vazio ou cheio
         push(q,&recv_message); //we don't have to lock otherwise? https://stackoverflow.com/questions/31105198/how-to-put-mutex-lock-unlock-for-a-specific-condition-in-if-else-ladder
     }
@@ -47,7 +54,7 @@ void* thread_entry_prod(void *arg){
             return NULL;
         }
     }
-   
+  
 
     return NULL;
 }
@@ -92,11 +99,40 @@ void* thread_entry_cons(void *arg) {
         return NULL;
     }
 
+    request->pid = getpid();
+    request->tid = pthread_self();
+
     if((fd_private_fifo = open(private_fifo_path, O_WRONLY)) == -1) {
-        fprintf(stderr, "No public pipe found with given path.\n");
+        //fprintf(stderr, "No public pipe found with given path.\n");
+        if(log_operation(request,FAILD) != 0) {
+            free(private_fifo_path);
+            free(request);
+            return NULL;
+        }
         free(private_fifo_path);
         free(request);
+        return NULL;
     }
+
+    int n = write(fd_private_fifo, request, sizeof(message_t));
+
+    if (n < 0) {
+        perror("Couldn't write in private FIFO");
+        close(fd_private_fifo);
+        free(private_fifo_path);
+        free(request);
+        return NULL;
+    }
+    else{
+        if(log_operation(request, TSKDN) != 0){
+            close(fd_private_fifo);
+            free(private_fifo_path);
+            free(request);
+            return NULL;
+        }
+    }
+
+
 
     free(private_fifo_path);
     free(request);
