@@ -23,9 +23,15 @@ void* thread_entry_prod(void *arg){
     int res = task(recv_message.tskload);
     recv_message.tskres = res;
 
-    if(store(&res)){
-        return NULL;
+    if(!full(q)) { //devendo os threads  Consumidor e Produtores ficarbloqueados quando o armazém estiver, respectivamente, vazio ou cheio
+        push(q, &res); //we don't have to lock otherwise? https://stackoverflow.com/questions/31105198/how-to-put-mutex-lock-unlock-for-a-specific-condition-in-if-else-ladder
     }
+    else{
+         if(store(&res)) {
+            return NULL;
+        }
+    }
+   
 
     return NULL;
 }

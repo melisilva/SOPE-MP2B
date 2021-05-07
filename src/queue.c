@@ -1,4 +1,5 @@
 #include "stdlib.h"
+#include <stdbool.h>
 
 #include "queue.h"
 
@@ -43,4 +44,12 @@ void pop(queue_t * q){
 
 void * front(queue_t q){
     return q.front->value;
+}
+
+bool empty(queue_t* q){
+    return (q->current_size == 0);
+}
+
+bool full(queue_t *q) {
+    return (q->current_size == q->max_size);
 }

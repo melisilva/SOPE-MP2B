@@ -2,6 +2,7 @@
 #define _QUEUE_H
 
 #include <stddef.h>
+#include <stdbool.h>
 
 typedef struct node
 {
@@ -24,5 +25,7 @@ void initQueue(queue_t * q, size_t max_size);
 void push(queue_t *q, int* value);
 void pop(queue_t * q);
 void * front(queue_t q);
+bool empty(queue_t* q);
+bool full(queue_t* q);
 
 #endif

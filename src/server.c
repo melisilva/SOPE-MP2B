@@ -14,6 +14,7 @@
 #include "./queue.h"
 
 #define PUBLIC_PERMS 0666
+#define BUFFER_QUEUE 100
 #define DEFAULT_BUFFER_SIZE 1 // TODO what is the defaut value?
 queue_t * q;
 
@@ -30,7 +31,7 @@ int main_cycle(time_t end_time, int fd_public_fifo) {
        }
        message_builder(&message_received, message_received.rid, message_received.tskload, message_received.tskres);
        log_operation(&message_received, RECVD);
-       pthread_create(&tids[i], NULL, thread_entry_prod, (void*)&message_received); //Produtor
+       pthread_create(&tids[i], NULL, thread_entry_prod, (void*)&message_received); //Produtores-->various
        i++;
     }
 
@@ -135,7 +136,7 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    //initQueue()?
+    initQueue(q,BUFFER_QUEUE);
 
     fprintf(stderr, "main before main loop\n");
     
@@ -160,3 +161,4 @@ int main(int argc, char *argv[]) {
 
     return 0;
 }
+
