@@ -1,5 +1,5 @@
 #include "stdlib.h"
-#include <stdbool.h>
+#include "stdbool.h"
 
 #include "queue.h"
 
@@ -10,7 +10,7 @@ void initQueue(queue_t * q, size_t max_size){
     q->back = NULL;
 }
 
-void push(queue_t * q, int* value){
+void push(queue_t * q, message_t* value){
 
     q->current_size++;
 
@@ -53,3 +53,4 @@ bool empty(queue_t* q){
 bool full(queue_t *q) {
     return (q->current_size == q->max_size);
 }
+

@@ -23,6 +23,7 @@ int main_cycle(time_t end_time, int fd_public_fifo) {
     size_t size_tids = 1000;
     pthread_t *tids = malloc(size_tids * sizeof(pthread_t));
     size_t i = 0;
+    //Create consumer thread?-->It's a single thread but needs to be work constantly
     while (time(NULL) < end_time ) { //server only stops when time runs out
         //get info in queue
        if(read(fd_public_fifo, &message_received, sizeof(message_t))<0){
@@ -161,4 +162,3 @@ int main(int argc, char *argv[]) {
 
     return 0;
 }
-
