@@ -10,21 +10,28 @@
 
 #include "./utils.h"
 #include "./lib.h"
+#include "./thread.h"
+#include "./queue.h"
 
 #define PUBLIC_PERMS 0666
 #define DEFAULT_BUFFER_SIZE 1 // TODO what is the defaut value?
-pthread_mutex_t LOCK_STORAGE; // extern pthread_mutex_t LOCK_STORAGE; in thread.h
-
+queue_t * q;
 
 int main_cycle(time_t end_time, int fd_public_fifo) {
     message_t message_received;
-    while (time(NULL) < end_time ) {
+    size_t size_tids = 1000;
+    pthread_t *tids = malloc(size_tids * sizeof(pthread_t));
+    size_t i = 0;
+    while (time(NULL) < end_time ) { //server only stops when time runs out
         //get info in queue
        if(read(fd_public_fifo, &message_received, sizeof(message_t))<0){
            perror("Couldn't read public FIFO");
            return 1;
        }
        message_builder(&message_received, message_received.rid, message_received.tskload, message_received.tskres);
+       log_operation(&message_received, RECVD);
+       pthread_create(&tids[i], NULL, thread_entry_prod, (void*)&message_received); //Produtor
+       i++;
     }
 
 
@@ -32,21 +39,6 @@ int main_cycle(time_t end_time, int fd_public_fifo) {
     return 0;
 }
 
-int init_mutexs(){
-    if(pthread_mutex_init(&LOCK_STORAGE, NULL) != 0) {
-        perror("");
-        return 1;
-    }
-    return 0;
-}
-
-int destroy_mutexs(){
-    if(pthread_mutex_destroy(&LOCK_STORAGE) != 0) {
-        perror("");
-        return 1;
-    }
-    return 0;
-}
 
 int input_check(int argc, char *argv[], int *nsecs, int *bufsz,int *fd_public_fifo) {
     //s -t nsecs -l bufsz fifoname
@@ -106,6 +98,22 @@ int input_check(int argc, char *argv[], int *nsecs, int *bufsz,int *fd_public_fi
     return 0;
 }
 
+int init_mutexs(){
+    if(pthread_mutex_init(&LOCK_STORAGE, NULL) != 0) {
+        perror("");
+        return 1;
+    }
+    return 0;
+}
+
+int destroy_mutexs(){
+    if(pthread_mutex_destroy(&LOCK_STORAGE) != 0) {
+        perror("");
+        return 1;
+    }
+    return 0;
+}
+
 int main(int argc, char *argv[]) {
     time_t start_time = time(NULL);
     
@@ -126,6 +134,8 @@ int main(int argc, char *argv[]) {
         unlink(argv[3 + 2*(argc == 6)]);
         return 1;
     }
+
+    //initQueue()?
 
     fprintf(stderr, "main before main loop\n");
     
