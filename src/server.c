@@ -21,23 +21,25 @@ queue_t * q;
 int main_cycle(time_t end_time, int fd_public_fifo) {
     message_t message_received;
     size_t size_tids = 1000;
-    pthread_t *tids = malloc(size_tids * sizeof(pthread_t));
     size_t i = 0;
-    //Create consumer thread?-->It's a single thread but needs to be work constantly
-    while (time(NULL) < end_time ) { //server only stops when time runs out
-        //get info in queue
+    pthread_t *tids = malloc(size_tids * sizeof(pthread_t));
+    pthread_t *ctid = malloc(sizeof(pthread_t));
+
+    // Create consumer thread?-->It's a single thread but needs to be work constantly
+    // Here's an attempt.
+    pthread_create(&ctid, NULL, consumer_cycle, (time_t*) end_time);
+
+    while (time(NULL) < end_time ) { // Server only stops when time runs out
+        // Get info in queue
        if(read(fd_public_fifo, &message_received, sizeof(message_t))<0){
            perror("Couldn't read public FIFO");
            return 1;
        }
        message_builder(&message_received, message_received.rid, message_received.tskload, message_received.tskres);
        log_operation(&message_received, RECVD);
-       pthread_create(&tids[i], NULL, thread_entry_prod, (void*)&message_received); //Produtores-->various
+       pthread_create(&tids[i], NULL, thread_entry_prod, (void*)&message_received); // Various Producers
        i++;
     }
-
-
-
     return 0;
 }
 
@@ -100,8 +102,8 @@ int input_check(int argc, char *argv[], int *nsecs, int *bufsz,int *fd_public_fi
     return 0;
 }
 
-int init_mutexs(){
-    if(pthread_mutex_init(&LOCK_STORAGE, NULL) != 0) {
+int init_mutexs() {
+    if (pthread_mutex_init(&LOCK_STORAGE, NULL) != 0) {
         perror("");
         return 1;
     }
@@ -109,7 +111,7 @@ int init_mutexs(){
 }
 
 int destroy_mutexs(){
-    if(pthread_mutex_destroy(&LOCK_STORAGE) != 0) {
+    if (pthread_mutex_destroy(&LOCK_STORAGE) != 0) {
         perror("");
         return 1;
     }
@@ -119,7 +121,6 @@ int destroy_mutexs(){
 int main(int argc, char *argv[]) {
     time_t start_time = time(NULL);
     
-
     //RAND_R_SEED = start_time;
     int nsecs;
     int bufsz;
@@ -137,12 +138,12 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    initQueue(q,BUFFER_QUEUE);
+    initQueue(q, BUFFER_QUEUE);
 
     fprintf(stderr, "main before main loop\n");
     
     time_t end_time = start_time + nsecs;
-    if(main_cycle(end_time, fd_public_fifo)){
+    if (main_cycle(end_time, fd_public_fifo)) {
         close(fd_public_fifo);
         unlink(argv[3 + 2*(argc == 6)]);
         return 1;

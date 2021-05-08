@@ -52,15 +52,22 @@ void* thread_entry_prod(void *arg){
     return NULL;
 }
 
+void* consumer_cycle(time_t end_time){
+    // This is just a wrapper function that keeps calling the consumer thread function,
+    // it's meant to only be called by the consumer thread.
+    while (time(NULL) < end_time){
+        thread_entry_cons(NULL);
+    }
+}
+
 void* thread_entry_cons(void *arg) {
     message_t * request;
 
-    if(!empty(q)) {
+    if (!empty(q)) {
         request = (message_t *)q->front;
         pop(q);
-    }
-    else{
-        if(load(request)){
+    } else {
+        if (load(request)) {
             free(request);
             return NULL;
         }
@@ -92,7 +99,7 @@ void* thread_entry_cons(void *arg) {
         return NULL;
     }
 
-    if((fd_private_fifo = open(private_fifo_path, O_WRONLY)) == -1) {
+    if ((fd_private_fifo = open(private_fifo_path, O_WRONLY)) == -1) {
         fprintf(stderr, "No public pipe found with given path.\n");
         free(private_fifo_path);
         free(request);

@@ -7,4 +7,6 @@ void* thread_entry_prod(void *arg);
 
 void* thread_entry_cons(void *arg);
 
+void *consumer_cycle(time_t end_time);
+
 #endif  // SRC_THREADS_H_
