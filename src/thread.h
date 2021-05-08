@@ -5,8 +5,8 @@ extern pthread_mutex_t LOCK_STORAGE;
 
 void* thread_entry_prod(void *arg);
 
-void* thread_entry_cons(void *arg);
+void* thread_entry_cons();
 
-void *consumer_cycle(time_t end_time);
+void *consumer_cycle(void *arg);
 
 #endif  // SRC_THREADS_H_

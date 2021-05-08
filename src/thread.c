@@ -6,7 +6,7 @@
 
 pthread_mutex_t LOCK_STORAGE;
 
-int store(message_t*res){
+int store(message_t*res) {
     if(pthread_mutex_lock(&LOCK_STORAGE) != 0) {
         return 1;
     }
@@ -59,21 +59,14 @@ void* thread_entry_prod(void *arg){
     return NULL;
 }
 
-void* consumer_cycle(time_t end_time){
-    // This is just a wrapper function that keeps calling the consumer thread function,
-    // it's meant to only be called by the consumer thread.
-    while (time(NULL) < end_time){
-        thread_entry_cons(NULL);
-    }
-}
-
-void* thread_entry_cons(void *arg) {
+void* thread_entry_cons() {
     message_t * request;
 
-    if (!empty(q)) {
+    if(!empty(q)) {
         request = (message_t *)q->front;
         pop(q);
-    } else {
+    }
+    else {
         if (load(request)) {
             free(request);
             return NULL;
@@ -144,5 +137,17 @@ void* thread_entry_cons(void *arg) {
     free(private_fifo_path);
     free(request);
     close(fd_private_fifo);
+    return NULL;
+}
+
+void* consumer_cycle(void* args){
+    // This is just a wrapper function that keeps calling the consumer thread function,
+    // it's meant to only be called by the consumer thread.
+
+    int end_time = *(time_t*) args;
+    while (time(NULL) < end_time) {
+        thread_entry_cons();
+    }
+
     return NULL;
 }
