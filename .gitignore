@@ -3,3 +3,5 @@ client_log.txt
 server_log.txt
 client_stderr.txt
 server_stderr.txt
+test.txt
+test2.txt
