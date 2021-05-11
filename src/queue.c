@@ -1,56 +1,108 @@
-#include "stdlib.h"
-#include "stdbool.h"
+#include <stdlib.h>
+#include <stdbool.h>
+#include <string.h>
 
 #include "queue.h"
 
-void initQueue(queue_t * q, size_t max_size){
-    q->max_size = max_size;
-    q->current_size = 0;
-    q->front = NULL;
-    q->back = NULL;
+typedef struct node {
+    void *value;
+    struct node *next;
+} node_t;
+
+struct queue {
+    node_t *front;
+    node_t *back;
+    size_t current_size;
+    size_t element_size;
+};
+
+
+queue_t* new_queue(size_t element_size) {
+    queue_t *queue = malloc(sizeof(queue_t));
+    if (queue == NULL)
+        return NULL;
+    
+    queue->element_size = element_size;
+    queue->current_size = 0;
+    queue->front = NULL;
+    queue->back = NULL;
+
+    return queue;
 }
 
-void push(queue_t * q, message_t* value){
 
-    q->current_size++;
-
-    if (q->front == NULL){
-        node_t * new_node = malloc(sizeof(node_t));
-        new_node->value = value;
-        new_node->next = NULL;
-        q->front = new_node;
-        q->back = new_node;
+void delete_queue(queue_t *queue) {
+    if (queue == NULL)
         return;
+    
+    while (queue_pop(queue) == 0);
+    free(queue);
+}
+
+
+int queue_push(queue_t *queue, void *value){
+    if (queue == NULL)
+        return 1;
+
+    node_t *new_node = malloc(sizeof(node_t));
+    if (new_node == NULL)
+        return 1;
+
+    
+    new_node->value = malloc(queue->element_size);
+    if (new_node->value == NULL)
+        return 1;
+
+    memcpy(new_node->value, value, queue->element_size);
+    queue->current_size++;
+    new_node->next = NULL;
+
+    if (queue->front == NULL){
+        queue->front = new_node;
+        queue->back = new_node;
+
+    } else {
+        queue->back->next = new_node;
+        queue->back = new_node;
     }
 
-    node_t * new_node = malloc(sizeof(node_t));
-    new_node->value = value;
-    new_node->next = NULL;
-    q->back->next = new_node;
-    q->back = new_node;
+    return 0;
 }
 
-void pop(queue_t * q){
-    if (q->front == NULL) return;
 
-    node_t * old_node = q->front;
-    q->front = old_node->next;
+int queue_pop(queue_t * queue){
+    if (queue == NULL)
+        return 1;
+
+    if (queue->front == NULL) 
+        return 1;
+
+    node_t *old_node = queue->front;
+    queue->front = queue->front->next;
 
     free(old_node->value);
     free(old_node);
 
-    q->current_size--;
+    queue->current_size--;
+
+    return 0;
 }
 
-void * front(queue_t q){
-    return q.front->value;
+void *queue_front(queue_t *queue){
+    if (queue == NULL)
+        return NULL;
+    return queue->front->value;
 }
 
-bool empty(queue_t* q){
-    return (q->current_size == 0);
+bool queue_empty(queue_t *queue){
+    if (queue == NULL)
+        return true; // ?
+    
+    return queue->current_size == 0;
 }
 
-bool full(queue_t *q) {
-    return (q->current_size == q->max_size);
+size_t queue_size(queue_t *queue){
+    if (queue == NULL)
+        return 0;
+    return queue->current_size;
 }
-

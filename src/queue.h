@@ -6,29 +6,14 @@
 
 #include "./utils.h"
 
-typedef struct node
-{
-    //void * value;
-    //int* value; //need to store task result
-    message_t *value; //also need pid & tid from client in order to open private FIFO
-    struct node * next;
-} node_t;
+struct queue;
+typedef struct queue queue_t;
 
+queue_t* new_queue(size_t element_size);
+void delete_queue(queue_t *queue);
+int queue_push(queue_t *queue, void *value);
+int queue_pop(queue_t *queue);
+void *queue_front(queue_t *queue);
+size_t queue_size(queue_t *queue);
 
-typedef struct queue
-{
-    node_t * front;
-    node_t * back;
-    size_t current_size;
-    size_t max_size;
-} queue_t;
-
-void initQueue(queue_t * q, size_t max_size);
-//void push(queue_t * q, void * value);
-void push(queue_t *q, message_t *value);
-void pop(queue_t * q);
-void * front(queue_t q);
-bool empty(queue_t* q);
-bool full(queue_t* q);
-
-#endif
+#endif // _QUEUE_H
