@@ -42,6 +42,7 @@ int load(message_t *request) {
 
 void* thread_entry_prod(void *arg){
     message_t recv_message = *(message_t*)arg;
+    free((message_t*)arg);
     pid_t client_pid = recv_message.pid;
     pthread_t client_tid = recv_message.tid;
     recv_message.pid = getpid();

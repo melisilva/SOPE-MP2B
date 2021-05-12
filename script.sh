@@ -105,11 +105,11 @@ RES_EXEC=$(grep 'TSKEX' server_log.txt | tr -d [:blank:] | awk -F\; '{print $6}'
 RES_DONE=$(grep 'TSKDN' server_log.txt | tr -d [:blank:] | awk -F\; '{print $6}' | sort -n)
 RES_DONE_FAILD=$(grep 'TSKDN\|FAILD' server_log.txt | tr -d [:blank:] | awk -F\; '{print $6}' | sort -n)
 
-ID_CLIENT=$(grep 'IWANT' client_log.txt | tr -d [:blank:] | awk -F\; '{print $2}' | sort -n)
+ID_CLIENT=$(grep 'IWANT' client_log.txt | tr -d [:blank:] | awk -F\; '{print $2}' | sort -n) > id_client.txt
 ID_SERVER=$(grep 'RECVD' server_log.txt | tr -d [:blank:] | awk -F\; '{print $2}' | sort -n)
 ID_EXEC=$(grep 'TSKEX' server_log.txt | tr -d [:blank:] | awk -F\; '{print $2}' | sort -n)
 ID_DONE=$(grep 'TSKDN' server_log.txt | tr -d [:blank:] | awk -F\; '{print $2}' | sort -n)
-ID_EXEC_2LATE=$(grep 'TSKEX\|2LATE' server_log.txt | tr -d [:blank:] | awk -F\; '{print $2}' | sort -n)
+ID_EXEC_2LATE=$(grep 'TSKEX\|2LATE' server_log.txt | tr -d [:blank:] | awk -F\; '{print $2}' | sort -n) > id_exec_2late.txt
 ID_DONE_FAILD=$(grep 'TSKDN\|FAILD' server_log.txt | tr -d [:blank:] | awk -F\; '{print $2}' | sort -n)
 }
 

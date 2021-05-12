@@ -23,7 +23,6 @@ queue_t *queue = NULL;
 
 int main_cycle(time_t end_time, int fd_public_fifo) {
     int ret = 0;
-    message_t message_received;
     size_t size_tids = 1000;
     pthread_t *tids = malloc(size_tids * sizeof(pthread_t));
     pthread_t ctid;
@@ -40,7 +39,10 @@ int main_cycle(time_t end_time, int fd_public_fifo) {
         //while EOF
         int r_res;
         bool _break = false;
-        while ((r_res = read(fd_public_fifo, &message_received, sizeof(message_t))) <= 0) {
+
+        message_t * message_received = malloc(sizeof(message_t));
+
+        while ((r_res = read(fd_public_fifo, message_received, sizeof(message_t))) <= 0) {
             if (time(NULL) >= end_time + OVERTIME_SECONDS_2LATE) { // while loop condition
                 _break = true;
                 break;
@@ -58,7 +60,7 @@ int main_cycle(time_t end_time, int fd_public_fifo) {
             break;
 
         message_t log_message;
-        message_builder(&log_message, message_received.rid, message_received.tskload, message_received.tskres);
+        message_builder(&log_message, (*message_received).rid, (*message_received).tskload, (*message_received).tskres);
         if (log_operation(&log_message, RECVD) != 0) {
            free(tids);
            return 1;
@@ -76,7 +78,7 @@ int main_cycle(time_t end_time, int fd_public_fifo) {
             }
         }
 
-        while (pthread_create(&tids[i], NULL, thread_entry_prod, (void*)&message_received) != 0); //Produtores-->various
+        while (pthread_create(&tids[i], NULL, thread_entry_prod, (void*)message_received) != 0); //Produtores-->various
 
         // if 2LATE
         SERVER_CLOSED = SERVER_CLOSED || (time(NULL) > end_time);
