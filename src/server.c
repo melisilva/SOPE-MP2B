@@ -132,15 +132,8 @@ int input_check(int argc, char *argv[], int *nsecs, size_t *bufsz,int *fd_public
         *bufsz = DEFAULT_BUFFER_SIZE;
     }
 
-    int cod;
-    if ((cod = mkfifo(argv[3 + 2*(argc == 6)], PUBLIC_PERMS)) != 0) {
-        if (errno != EEXIST) {
-            // TODO what to do if fifo with this name already exists?
-            // run normally?
-            perror("");
-            //fprintf(stderr, "Not possible to make public fifo.\n");
-            return 1;
-        }
+    if (mkfifo(argv[3 + 2*(argc == 6)], PUBLIC_PERMS) != 0) {
+        perror("Failed creating public fifo ");
     }
 
     if ((*fd_public_fifo = open(argv[3 + 2*(argc == 6)], O_RDONLY)) == -1) {
