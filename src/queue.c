@@ -88,10 +88,15 @@ int queue_pop(queue_t * queue){
     return 0;
 }
 
-void *queue_front(queue_t *queue){
-    if (queue == NULL)
-        return NULL;
-    return queue->front->value;
+int queue_front(queue_t *queue, void *value) {
+     if (queue == NULL)
+         return 1;
+     if (value == NULL)
+         return 1;
+
+     memcpy(value, queue->front->value, queue->element_size);
+
+     return 0;
 }
 
 bool queue_empty(queue_t *queue){

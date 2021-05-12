@@ -31,7 +31,7 @@ int load(message_t *request) {
     sem_wait(&SEM_FULL);
     pthread_mutex_lock(&LOCK_STORAGE);
     // fprintf(stderr, "pop: %ld\n", queue_size(queue)); // debug
-    *request = *(message_t *)queue_front(queue);
+    queue_front(queue, request);
     queue_pop(queue);
 
     pthread_mutex_unlock(&LOCK_STORAGE);
