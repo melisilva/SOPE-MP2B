@@ -111,6 +111,8 @@ ID_EXEC=$(grep 'TSKEX' server_log.txt | tr -d [:blank:] | awk -F\; '{print $2}' 
 ID_DONE=$(grep 'TSKDN' server_log.txt | tr -d [:blank:] | awk -F\; '{print $2}' | sort -n)
 ID_EXEC_2LATE=$(grep 'TSKEX\|2LATE' server_log.txt | tr -d [:blank:] | awk -F\; '{print $2}' | sort -n > id_exec_2late.txt) 
 ID_DONE_FAILD=$(grep 'TSKDN\|FAILD' server_log.txt | tr -d [:blank:] | awk -F\; '{print $2}' | sort -n)
+ID_FAILD=$(grep 'FAILD' server_log.txt | tr -d [:blank:] | awk -F\; '{print $2}' | sort -n > id_faild.txt)
+ID_EXEC_2LATE_FAILD=$(grep 'TSKEX\|2LATE\|FAILD' server_log.txt | tr -d [:blank:] | awk -F\; '{print $2}' | sort -n > id_exec_2late_faild.txt) 
 }
 
  verifyTotals() {
