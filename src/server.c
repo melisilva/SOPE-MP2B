@@ -56,14 +56,17 @@ int main_cycle(time_t end_time, int fd_public_fifo) {
             }
         }
 
-        if (_break)
+        if (_break) {
+            free(message_received);
             break;
+        }
 
         message_t log_message;
-        message_builder(&log_message, (*message_received).rid, (*message_received).tskload, (*message_received).tskres);
+        message_builder(&log_message, message_received->rid, message_received->tskload, message_received->tskres);
         if (log_operation(&log_message, RECVD) != 0) {
-           free(tids);
-           return 1;
+            free(message_received);
+            free(tids);
+            return 1;
         }
 
         if (i == size_tids) {
@@ -72,6 +75,7 @@ int main_cycle(time_t end_time, int fd_public_fifo) {
 
             if (new_tids == NULL) {
                 ret = 1;
+                free(message_received);
                 break; // could not allocate more bytes
             } else {
                 tids = new_tids;

@@ -106,14 +106,11 @@ RES_DONE=$(grep 'TSKDN' server_log.txt | tr -d [:blank:] | awk -F\; '{print $6}'
 RES_DONE_FAILD=$(grep 'TSKDN\|FAILD' server_log.txt | tr -d [:blank:] | awk -F\; '{print $6}' | sort -n)
 
 ID_CLIENT=$(grep 'IWANT' client_log.txt | tr -d [:blank:] | awk -F\; '{print $2}' | sort -n)
-ID_CLIENT_F=$(grep 'IWANT' client_log.txt | tr -d [:blank:] | awk -F\; '{print $2}' | sort -n > id_client.txt)  
 ID_SERVER=$(grep 'RECVD' server_log.txt | tr -d [:blank:] | awk -F\; '{print $2}' | sort -n)
 ID_EXEC=$(grep 'TSKEX' server_log.txt | tr -d [:blank:] | awk -F\; '{print $2}' | sort -n)
 ID_DONE=$(grep 'TSKDN' server_log.txt | tr -d [:blank:] | awk -F\; '{print $2}' | sort -n)
-ID_EXEC_2LATE=$(grep 'TSKEX\|2LATE' server_log.txt | tr -d [:blank:] | awk -F\; '{print $2}' | sort -n) 
+ID_EXEC_2LATE=$(grep 'TSKEX\|2LATE' server_log.txt | tr -d [:blank:] | awk -F\; '{print $2}' | sort -n)
 ID_DONE_FAILD=$(grep 'TSKDN\|FAILD' server_log.txt | tr -d [:blank:] | awk -F\; '{print $2}' | sort -n)
-ID_FAILD=$(grep 'FAILD' server_log.txt | tr -d [:blank:] | awk -F\; '{print $2}' | sort -n)
-ID_EXEC_2LATE_FAILD=$(grep 'TSKEX\|2LATE\|FAILD' server_log.txt | tr -d [:blank:] | awk -F\; '{print $2}' | sort -n > id_exec_2late_faild.txt) 
 }
 
  verifyTotals() {
@@ -143,7 +140,7 @@ verifySequences() {
   UNIQUE_RES_SERVER=$(echo "$RES_DONE" | uniq -d)
   if [ ! -z "$UNIQUE_RES_SERVER" ]; then echo "ERROR: REPEATED RESULTS ON SERVER"; else echo "ALL OK (SERVER-RES)"; fi
 
-  if [ "$ID_CLIENT" = "$ID_EXEC_2LATE" ]; then echo "ALL OK"; else echo "ERROR: OPERATIONS EXECUTED DIFFER ON CLIENT vs SERVER"; fi
+###professor confirmou que este teste esta errado (ver email 14-05-2021)  if [ "$ID_CLIENT" = "$ID_EXEC_2LATE" ]; then echo "ALL OK"; else echo "ERROR: OPERATIONS EXECUTED DIFFER ON CLIENT vs SERVER"; fi
   if [ "$RES_CLIENT" = "$RES_DONE" ]; then echo "ALL OK"; else echo "ERROR: RESULTS RETURNED DIFFER ON CLIENT vs SERVER"; fi
 ###25abr  if [ "$RES_CLIENT" = "$RES_EXEC" ]; then echo "ALL OK"; else echo "ERROR: RESULTS RETURNED DIFFER ON CLIENT vs SERVER"; fi
 ###25abr  if [ "$RES_EXEC" = "$RES_DONE" ]; then echo "ALL OK"; else echo "ERROR: RESULTS RECEIVED DIFFER FROM SENT"; fi
