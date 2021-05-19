@@ -100,7 +100,6 @@ void* thread_entry_cons() {
 
     if ((fd_private_fifo = open(private_fifo_path, O_WRONLY | O_NONBLOCK)) == -1) {
         log_operation(&request, FAILD);
-        perror("Private fifo open error ");
         free(private_fifo_path);
         return NULL;
     }
