@@ -98,13 +98,16 @@ int main_cycle(time_t end_time, int fd_public_fifo) {
     }
 
     bool empty = false;
-    while (!empty) {
+    while (true) {
         pthread_mutex_lock(&LOCK_STORAGE);
 
         empty = queue_empty(queue);
 
         pthread_mutex_unlock(&LOCK_STORAGE);
-        sleep(1);
+        if (empty)
+            break;
+        else
+            sleep(1);
     }
 
     pthread_cancel(ctid);
