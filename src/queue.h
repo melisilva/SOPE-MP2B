@@ -14,7 +14,6 @@ void delete_queue(queue_t *queue);
 int queue_push(queue_t *queue, void *value);
 int queue_pop(queue_t *queue);
 int queue_front(queue_t *queue, void *value);
-size_t queue_size(queue_t *queue);
 bool queue_empty(queue_t *queue);
 
 #endif // _QUEUE_H

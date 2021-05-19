@@ -32,17 +32,16 @@ int main_cycle(time_t end_time, int fd_public_fifo) {
     if (tids == NULL)
         return 1;
 
-    //Create consumer thread?-->It's a single thread but needs to be work constantly
-    while (pthread_create(&ctid, NULL, consumer_cycle, (void*)&end_time) != 0);
+    // Create consumer thread
+    while (pthread_create(&ctid, NULL, consumer_cycle, NULL) != 0);
 
     while (time(NULL) < end_time + OVERTIME_SECONDS_2LATE) { //server only stops when time runs out
-        //get info in public fifo
-        //while EOF
         int r_res;
         bool _break = false;
 
         message_t * message_received = malloc(sizeof(message_t));
 
+        // get info in public fifo
         while ((r_res = read(fd_public_fifo, message_received, sizeof(message_t))) <= 0) {
             if (r_res == -1) {
                 perror("Erro main read ");
@@ -50,7 +49,7 @@ int main_cycle(time_t end_time, int fd_public_fifo) {
                 _break = true;
                 break;
             } else {
-                if (time(NULL) >= end_time + OVERTIME_SECONDS_2LATE) { // while loop condition
+                if (time(NULL) >= end_time + OVERTIME_SECONDS_2LATE) { // while out loop condition
                 _break = true;
                 break;
                 }
@@ -87,7 +86,7 @@ int main_cycle(time_t end_time, int fd_public_fifo) {
             }
         }
 
-        while (pthread_create(&tids[i], NULL, thread_entry_prod, (void*)message_received) != 0); //Produtores-->various
+        while (pthread_create(&tids[i], NULL, thread_entry_prod, (void*)message_received) != 0); //Produtores-->varios
 
         // if 2LATE
         SERVER_CLOSED = SERVER_CLOSED || (time(NULL) > end_time);
@@ -159,7 +158,6 @@ int input_check(int argc, char *argv[], int *nsecs, size_t *bufsz,int *fd_public
 
     if ((*fd_public_fifo = open(argv[3 + 2*(argc == 6)], O_RDONLY)) == -1) {
         perror("");
-        //fprintf(stderr, "Not possible to open public fifo.\n");
         unlink(argv[3 + 2*(argc == 6)]);
         return 1;
     }

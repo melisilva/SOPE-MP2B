@@ -105,9 +105,3 @@ bool queue_empty(queue_t *queue){
     
     return queue->current_size == 0;
 }
-
-size_t queue_size(queue_t *queue){
-    if (queue == NULL)
-        return 0;
-    return queue->current_size;
-}

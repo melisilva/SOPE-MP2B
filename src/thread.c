@@ -18,7 +18,7 @@ typedef struct args_cancel {
 int store(message_t*res) {
     sem_wait(&SEM_EMPTY);
     pthread_mutex_lock(&LOCK_STORAGE);
-    // fprintf(stderr, "push: %ld\n", queue_size(queue)); // debug
+
     queue_push(queue, res);
 
     pthread_mutex_unlock(&LOCK_STORAGE);
@@ -30,7 +30,7 @@ int store(message_t*res) {
 int load(message_t *request) {
     sem_wait(&SEM_FULL);
     pthread_mutex_lock(&LOCK_STORAGE);
-    // fprintf(stderr, "pop: %ld\n", queue_size(queue)); // debug
+
     queue_front(queue, request);
     queue_pop(queue);
 
@@ -139,7 +139,6 @@ void* consumer_cycle(void* args) {
     // This is just a wrapper function that keeps calling the consumer thread function,
     // it's meant to only be called by the consumer thread.
 
-    // int end_time = *(time_t*) args;
     while (true) {
         thread_entry_cons();
     }
