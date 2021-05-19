@@ -15,8 +15,9 @@
 #include "./queue.h"
 
 #define PUBLIC_PERMS 0666
-#define DEFAULT_BUFFER_SIZE 1 // TODO what is the defaut value?
+#define DEFAULT_BUFFER_SIZE 1
 
+time_t OVERTIME_SECONDS_2LATE = 5;
 bool SERVER_CLOSED = false;
 queue_t *queue = NULL;
 
@@ -43,22 +44,26 @@ int main_cycle(time_t end_time, int fd_public_fifo) {
         message_t * message_received = malloc(sizeof(message_t));
 
         while ((r_res = read(fd_public_fifo, message_received, sizeof(message_t))) <= 0) {
-            if (time(NULL) >= end_time + OVERTIME_SECONDS_2LATE) { // while loop condition
-                _break = true;
-                break;
-            }
-
             if (r_res == -1) {
                 perror("Erro main read ");
                 ret = 1;
                 _break = true;
                 break;
+            } else {
+                if (time(NULL) >= end_time + OVERTIME_SECONDS_2LATE) { // while loop condition
+                _break = true;
+                break;
+                }
             }
         }
 
         if (_break) {
             free(message_received);
             break;
+        }
+
+        if (time(NULL) >= end_time + OVERTIME_SECONDS_2LATE && r_res > 0) {
+                OVERTIME_SECONDS_2LATE += 2;
         }
 
         message_t log_message;
@@ -91,6 +96,16 @@ int main_cycle(time_t end_time, int fd_public_fifo) {
 
     for (size_t j = 0; j < i; j++) {
         pthread_join(tids[j], NULL);
+    }
+
+    bool empty = false;
+    while (!empty) {
+        pthread_mutex_lock(&LOCK_STORAGE);
+
+        empty = queue_empty(queue);
+
+        pthread_mutex_unlock(&LOCK_STORAGE);
+        sleep(1);
     }
 
     pthread_cancel(ctid);
